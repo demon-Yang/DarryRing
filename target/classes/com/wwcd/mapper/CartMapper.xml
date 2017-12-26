@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wwcd.dao.CartDao">
+	<!-- 添加商品到购物车 -->
+	<insert id="add">
+		insert into tb_cart values(null,#{gid},#{uid})
+	</insert>
+	<!-- 删除购物车中的商品 -->
+	<delete id="delete" parameterType="int">
+		delete from tb_cart where cid = #{cid}
+	</delete>
+	<!-- 根据Uid删除购物车中的商品-->
+	<delete id="deleteByUid" parameterType="int">
+		delete from tb_cart where uid = #{uid}
+	</delete>
+	<!-- 按Uid,Gid查询购物车中是否存在该商品 -->
+	<select id="findExist" resultType="Cart">
+		select * from tb_cart where gid = #{gid} and uid = #{uid}
+	</select>
+	<!-- 按Uid查询所有购物车中所有商品 -->
+	<select id="findByUid" parameterType="int" resultMap="cart_map">
+		select c.cid,g.* from tb_cart c
+		left join tb_goods g on g.gid = c.gid
+		where c.uid = #{uid}
+		order by c.cid desc
+	</select>
+	<resultMap type="Cart" id="cart_map">
+		<id property="cid" column="cid"/>
+		<association property="goods" javaType="com.wwcd.entity.Goods">
+			<id property="gid" column="gid"/>
+			<result property="gname" column="gname"/>
+			<result property="gprice" column="gprice"/>
+			<result property="gseries" column="gseries"/>
+			<result property="gtype" column="gtype"/>
+			<result property="gweight" column="gweight"/>
+			<result property="gsize" column="gsize"/>
+			<result property="gimg1" column="gimg1"/>
+		</association>
+	</resultMap>
+</mapper>

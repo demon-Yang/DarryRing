@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wwcd.dao.GoodsDao">
+	<!-- 添加商品 -->
+	<insert id="add" parameterType="Goods">
+		insert into tb_goods values(null,#{gname},#{gprice},#{gseries},#{gtype},#{gweight},#{gsize},#{gnum},#{gbrief},#{gimg1},#{gimg2},#{gimg3},#{gimg4})
+	</insert>
+	<!-- 修改商品数量 -->
+	<update id="modify">
+		update tb_goods set gnum = #{gnum} where gid = #{gid}
+	</update>
+	<!-- 删除商品 -->
+	<delete id="delete">
+		delete from tb_goods where gid = #{gid}
+	</delete>
+	<!-- 查询商品剩余库存量 -->
+	<select id="findGnum" parameterType="int" resultType="int">
+		select gnum from tb_goods where gid = #{gid} 
+	</select>
+	<!-- 查询所有商品 -->
+	<select id="findAll" resultType="Goods">
+		select * from tb_goods 
+		order by gid desc
+	</select>
+	<!-- 查询热销商品 -->
+	<select id="findHot" resultMap="goodsView_map">
+		select g.*,count(d.gid) as gsales from tb_goods g 
+		left join tb_detail d on d.gid = g.gid
+		where g.gnum > 0
+		group by g.gid
+		order by gsales desc
+		limit 0,8
+	</select>
+	<!-- 按条件查询商品 -->
+	<select id="findByCondition" resultMap="goodsView_map">
+		select g.*,count(d.gid) as gsales from tb_goods g
+		left join tb_detail d on d.gid = g.gid where g.gnum > 0
+			<if test="gseries != null and gseries.trim() != ''">
+				and g.gseries = #{gseries}
+			</if>
+			<if test="gtype != null and gtype.trim() != ''">
+				and g.gtype = #{gtype}
+			</if>
+			<if test="gweight != null and gweight.trim() != ''">
+				and g.gweight = #{gweight}
+			</if>
+			<if test="gsize != null and gsize != ''">
+				and g.gsize = #{gsize}
+			</if>
+			<if test="gname != null and gname.trim() != ''">
+				<bind name="gname_pattern" value="'%'+gname+'%'"/>
+				and g.gname like #{gname_pattern}
+			</if>
+		 group by g.gid
+		<if test="orderby == '按销量'">
+			order by gsales desc 
+		</if>
+		<if test="orderby == '按价格'">
+			order by g.gprice desc 
+		</if>
+		<if test="orderby != '按销量' and orderby != '按价格'">
+			order by g.gid desc
+		</if>
+	</select>
+	<!-- 按gid查询单个商品 -->
+	<select id="findByGid" parameterType="int" resultMap="goodsView_map">
+		select g.*,count(d.gid) as gsales from tb_goods g
+		left join tb_detail d on d.gid = g.gid
+		where g.gid = #{gid}
+	</select>
+	<resultMap type="GoodsView" id="goodsView_map">
+		<id property="" column=""/>
+		<result property="gsales" column="gsales"/>
+		<association property="goods" javaType="com.wwcd.entity.Goods">
+			<id property="gid" column="gid"/>
+			<result property="gname" column="gname"/>
+			<result property="gprice" column="gprice"/>
+			<result property="gseries" column="gseries"/>
+			<result property="gtype" column="gtype"/>
+			<result property="gweight" column="gweight"/>
+			<result property="gsize" column="gsize"/>
+			<result property="gnum" column="gnum"/>
+			<result property="gbrief" column="gbrief"/>
+			<result property="gimg1" column="gimg1"/>
+			<result property="gimg2" column="gimg2"/>
+			<result property="gimg3" column="gimg3"/>
+			<result property="gimg4" column="gimg4"/>
+		</association>
+	</resultMap>
+</mapper>

@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wwcd.dao.OrderDao">
+	<!-- 添加订单 -->
+	<insert id="add" parameterType="Order" keyProperty="oid" useGeneratedKeys="true">
+		insert into tb_order values(null,#{ostatus},#{ologistics},#{ocontent},#{ototal},#{odate},#{aid},#{uid})
+	</insert>
+	<!-- 按Uid查询订单 -->
+	<select id="findByUid" parameterType="int" resultMap="order_map">
+		select o.oid,o.ostatus,o.ologistics,o.ocontent,o.ototal,o.odate,u.uid,u.uname,u.unick,u.utel,a.aid,a.aname,a.addr,a.atel,a.apcode,g.*,count(d.oid) as dnum 
+		from tb_order o
+		left join tb_user u on u.uid = o.uid
+		left join tb_addr a on a.aid = o.aid
+		left join tb_detail d on d.oid = o.oid
+		left join tb_goods g on g.gid = d.gid
+		where o.uid = #{uid}
+		group by d.oid
+		order by o.oid desc
+	</select>
+	<!-- 按Oid查询订单 -->
+	<select id="findByOid" parameterType="int" resultMap="order_map" flushCache="true">
+		select o.oid,o.ostatus,o.ologistics,o.ocontent,o.ototal,o.odate,u.uid,u.uname,u.unick,u.utel,a.aid,a.aname,a.addr,a.atel,a.apcode,g.*
+		from tb_order o
+		left join tb_user u on u.uid = o.uid
+		left join tb_addr a on a.aid = o.aid
+		left join tb_detail d on d.oid = o.oid
+		left join tb_goods g on g.gid = d.gid
+		where o.oid = #{oid}
+	</select>
+	<!-- 后台查询所有订单 -->
+	<select id="findAll" resultMap="order_map">
+		SELECT 
+		o.oid,o.ostatus,o.ologistics,o.ocontent,o.ototal,o.odate,u.uid,u.uname,u.unick,u.utel,a.aid,a.aname,a.addr,a.atel,a.apcode,g.* 
+		from tb_order o 
+		LEFT JOIN tb_addr a on a.aid = o.aid
+		LEFT JOIN tb_detail d on d.oid = o.oid
+		LEFT JOIN tb_user u on u.uid = o.uid
+		LEFT JOIN tb_goods g on g.gid = d.gid
+		where o.ostatus="已受理"
+		order by o.oid desc
+	</select>
+	<!-- 后台查询未受理订单 -->
+	<select id="findAllUn" resultMap="order_map">
+		SELECT 
+		o.oid,o.ostatus,o.ologistics,o.ocontent,o.ototal,o.odate,u.uid,u.uname,u.unick,u.utel,a.aid,a.aname,a.addr,a.atel,a.apcode,g.* 
+		from tb_order o 
+		LEFT JOIN tb_addr a on a.aid = o.aid
+		LEFT JOIN tb_detail d on d.oid = o.oid
+		LEFT JOIN tb_user u on u.uid = o.uid
+		LEFT JOIN tb_goods g on g.gid = d.gid
+		where o.ostatus="未受理"
+		order by o.oid desc
+	</select>
+	<!-- 后台受理订单 -->
+	<update id="modify">
+		update tb_order set ologistics = #{ologistics},ostatus="已受理" where oid = #{oid}
+	</update>
+	
+	<resultMap type="OrderView" id="order_map">
+		<id property="oid" column="oid"/>
+		<result property="dnum" column="dnum"/>
+		<association property="order" javaType="com.wwcd.entity.Order">
+			<id property="oid" column="oid"/>
+			<result property="ostatus" column="ostatus"/>
+			<result property="ologistics" column="ologistics"/>
+			<result property="ocontent" column="ocontent"/>
+			<result property="ototal" column="ototal"/>
+			<result property="odate" column="odate"/>
+		</association>
+		<association property="user" javaType="com.wwcd.entity.User">
+			<id property="uid" column="uid"/>
+			<result property="uname" column="uname"/>
+			<result property="unick" column="unick"/>
+			<result property="utel" column="utel"/>
+		</association>
+		<association property="address" javaType="com.wwcd.entity.Address">
+			<id property="aid" column="aid"/>
+			<result property="aname" column="aname"/>
+			<result property="addr" column="addr"/>
+			<result property="atel" column="atel"/>
+			<result property="apcode" column="apcode"/>
+		</association>
+		<collection property="gList" ofType="com.wwcd.entity.Goods" column="gid" javaType="java.util.ArrayList">
+			<id property="gid" column="gid"/>
+			<result property="gname" column="gname"/>
+			<result property="gprice" column="gprice"/>
+			<result property="gseries" column="gseries"/>
+			<result property="gtype" column="gtype"/>
+			<result property="gweight" column="gweight"/>
+			<result property="gsize" column="gsize"/>
+			<result property="gbrief" column="gbrief"/>
+			<result property="gimg1" column="gimg1"/>
+		</collection>
+	</resultMap>
+</mapper>

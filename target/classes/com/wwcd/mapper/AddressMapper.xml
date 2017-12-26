@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wwcd.dao.AddressDao">
+	<!-- 添加地址 -->
+	<insert id="add" parameterType="Address">
+		insert into tb_addr(aname,addr,atel,apcode,adefault,uid) values(#{aname},#{addr},#{atel},#{apcode},#{adefault},#{uid})
+	</insert>
+	<!-- 删除地址 -->
+	<delete id="delete" parameterType="int">
+		delete from tb_addr where aid = #{aid}
+	</delete>
+	<!-- 按Uid查询地址 -->
+	<select id="findByUid" parameterType="int" resultType="Address">
+		select * from tb_addr where uid = #{uid}
+	</select>
+	<!-- 设置地址 -->
+	<update id="modifyAdefaultNO" parameterType="int">
+		update tb_addr set adefault = 'no' where uid = #{uid}
+	</update>
+	<!-- 设置默认地址 -->
+	<update id="modifyAdefaultYES" parameterType="int">
+		update tb_addr set adefault = 'yes' where aid = #{aid}
+	</update>
+</mapper>
